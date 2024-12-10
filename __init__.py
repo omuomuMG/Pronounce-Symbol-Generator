@@ -3,15 +3,14 @@ from aqt.qt import *
 from aqt.editor import Editor
 from anki.hooks import addHook
 from aqt.utils import showInfo
-
 from .test import dic
-
+import sys
 
 source_field = "表面"
 target_field = "表面"
 
 
-def testFunction(editor: Editor):
+def convert_word(editor: Editor):
     if editor.note:
         note = editor.note
         symbol_text = ""
@@ -33,9 +32,27 @@ def testFunction(editor: Editor):
         QTimer.singleShot(500, lambda: editor.loadNote())
 
 
+class Madoka(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle('空っぽな窓')  # ウィンドウのタイトル
+        self.setGeometry(100, 100, 200, 150)  # ウィンドウの位置と大きさ
+
+def setting():
+    # QDialog を使ってダイアログを表示
+    dialog = QDialog()
+    dialog.setWindowTitle('サンプルダイアログ')
+    dialog.resize(250, 150)
+
+    button = QPushButton('閉じる', dialog)
+    button.clicked.connect(dialog.accept)
+
+    dialog.exec()
+
+
 # エディタのボタンに関連付ける関数
 def onStrike(editor: Editor):
-    testFunction(editor)
+    convert_word(editor)
 
 
 # カスタムボタンをエディタに追加する関数
@@ -57,8 +74,8 @@ action = QAction("test", mw)
 action2 = QAction("test2", mw)
 
 # メニュー項目がクリックされたときに testFunction を呼び出すように設定
-action.triggered.connect(lambda: testFunction(mw.editor))
-action2.triggered.connect(lambda: testFunction(mw.editor))
+action.triggered.connect(lambda: setting())
+action2.triggered.connect(lambda: convert_word(mw.editor))
 
 # ツールメニューに追加
 mw.form.menuTools.addAction(action)
