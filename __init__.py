@@ -2,6 +2,8 @@ from aqt import mw
 from aqt.qt import *
 from aqt.editor import Editor
 from anki.hooks import addHook
+from aqt.utils import showInfo
+
 from .test import dic
 
 
@@ -14,9 +16,14 @@ def testFunction(editor: Editor):
         note = editor.note
         symbol_text = ""
         for word in  note[source_field].split(' '):
-            if len(symbol_text) != 0:
-                symbol_text += ' '
-            symbol_text += dic[word.upper()]
+            word = word.upper()
+            if word in dic:
+                if len(symbol_text) != 0:
+                    symbol_text += ' '
+                symbol_text += dic[word]
+            else:
+                showInfo(f"pronunciation: {word} wasn't found")
+                break
 
         note[target_field] = symbol_text
 
