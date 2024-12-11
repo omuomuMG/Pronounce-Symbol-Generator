@@ -1,3 +1,5 @@
+from xmlrpc.client import boolean
+
 from aqt import mw
 from aqt.qt import *
 from aqt.editor import Editor
@@ -10,10 +12,13 @@ source_field = "表面"
 target_field = "表面"
 
 
+
+
 def convert_word(editor: Editor):
     if editor.note:
         note = editor.note
         symbol_text = ""
+        succeeded = True
         for word in  note[source_field].split(' '):
             word = word.upper()
             if word in dic:
@@ -21,33 +26,50 @@ def convert_word(editor: Editor):
                     symbol_text += ' '
                 symbol_text += dic[word]
             else:
+                succeeded = False
                 showInfo(f"pronunciation: {word} wasn't found")
                 break
-
-        note[target_field] = symbol_text
+        if succeeded:
+            note[target_field] = symbol_text
 
         # 変更をデータベースに保存
         note.flush()
         # UIの更新を強制的に行うために少し待機してからエディタをリロード
+
         QTimer.singleShot(500, lambda: editor.loadNote())
 
 
-class Madoka(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('空っぽな窓')  # ウィンドウのタイトル
-        self.setGeometry(100, 100, 200, 150)  # ウィンドウの位置と大きさ
-
 def setting():
-    # QDialog を使ってダイアログを表示
+    global source_field, target_field
+
     dialog = QDialog()
-    dialog.setWindowTitle('サンプルダイアログ')
-    dialog.resize(250, 150)
+    dialog.setWindowTitle('Setting')
+    dialog.resize(300, 200)
 
-    button = QPushButton('閉じる', dialog)
+    layout = QVBoxLayout()
+
+    # about source field
+    source_label = QLabel("Source Field:")
+    source_text = QLineEdit(f"{source_field}")
+    layout.addWidget(source_label)
+    layout.addWidget(source_text)
+
+    # about target field
+    target_label = QLabel("Target Field:")
+    target_text = QLineEdit(f"{target_field}")
+    layout.addWidget(target_label)
+    layout.addWidget(target_text)
+
+
+    button = QPushButton('Close')
     button.clicked.connect(dialog.accept)
+    layout.addWidget(button)
 
+    dialog.setLayout(layout)
     dialog.exec()
+
+    source_field = source_text.text()
+    target_field= target_text.text()
 
 
 # エディタのボタンに関連付ける関数
