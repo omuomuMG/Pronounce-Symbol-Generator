@@ -7,11 +7,20 @@ from anki.hooks import addHook
 from aqt.utils import showInfo
 from .test import dic
 import sys
-
-source_field = "表面"
-target_field = "表面"
+import json
 
 
+global source_field, target_field
+
+def init():
+    global source_field, target_field
+    addon_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(addon_dir, 'setting.json')
+    json_open = open(json_path, 'r')
+    json_load = json.load(json_open)
+    source_field = json_load['setting']['source_field']
+    target_field = json_load['setting']['target_field']
+    json_open.close()
 
 
 def convert_word(editor: Editor):
@@ -32,10 +41,7 @@ def convert_word(editor: Editor):
         if succeeded:
             note[target_field] = symbol_text
 
-        # 変更をデータベースに保存
         note.flush()
-        # UIの更新を強制的に行うために少し待機してからエディタをリロード
-
         QTimer.singleShot(500, lambda: editor.loadNote())
 
 
@@ -61,25 +67,36 @@ def setting():
     layout.addWidget(target_text)
 
 
-    button = QPushButton('Close')
+    button = QPushButton('Save')
     button.clicked.connect(dialog.accept)
     layout.addWidget(button)
 
     dialog.setLayout(layout)
     dialog.exec()
 
-    source_field = source_text.text()
-    target_field= target_text.text()
+    addon_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(addon_dir, 'setting.json')
+
+    with open(json_path, 'r+') as json_open:
+        json_load = json.load(json_open)
+        json_load['setting']['source_field'] = source_text.text()
+        json_load['setting']['target_field'] = target_text.text()
+
+        # Move file pointer to the beginning of the file and dump updated data
+        json_open.seek(0)
+        json.dump(json_load, json_open, indent=4)  # Adding indent for better readability
+        json_open.truncate()  # Ensure we truncate the file after writing
+
+        source_field = source_text.text()
+        target_field = target_text.text()
 
 
-# エディタのボタンに関連付ける関数
+# on button pressed
 def onStrike(editor: Editor):
     convert_word(editor)
 
 
-# カスタムボタンをエディタに追加する関数
 def addWeblioButton(buttons, editor):
-    # エディタに「ストライク」ボタンを追加
     editor._links['strike'] = onStrike
     return buttons + [editor._addButton(
         "image.png",  # ボタンの画像ファイル（適宜変更）
@@ -87,18 +104,16 @@ def addWeblioButton(buttons, editor):
         "weblio"  # ボタンのラベル
     )]
 
+init()
 
-# エディタにボタンを追加するフック
 addHook("setupEditorButtons", addWeblioButton)
 
-# 新しいメニュー項目 "test" を作成
-action = QAction("test", mw)
-action2 = QAction("test2", mw)
+
+action = QAction("Pronounce Generator Settings", mw)
 
 # メニュー項目がクリックされたときに testFunction を呼び出すように設定
 action.triggered.connect(lambda: setting())
-action2.triggered.connect(lambda: convert_word(mw.editor))
+#action2.triggered.connect(lambda: convert_word(mw.editor))
 
 # ツールメニューに追加
 mw.form.menuTools.addAction(action)
-mw.form.menuTools.addAction(action2)
