@@ -97,12 +97,35 @@ def onStrike(editor: Editor):
 
 
 def addWeblioButton(buttons, editor):
+    addon_dir = os.path.dirname(os.path.realpath(__file__))
+    icon_path = os.path.join(addon_dir, 'SymbolIcon.png')
+
     editor._links['strike'] = onStrike
-    return buttons + [editor._addButton(
-        "image.png",  # ボタンの画像ファイル（適宜変更）
-        "strike",  # ボタンの名前
-        "weblio"  # ボタンのラベル
-    )]
+
+    button = editor._addButton(
+        icon_path,  # Button icon
+        "strike",  # Button name
+        "strike"  # Button label
+    )
+
+    # Check if the returned object is a QPushButton
+    if isinstance(button, QPushButton):
+        # Set the style if the button is of the correct type
+        button.setStyleSheet("""
+            QPushButton {
+                width: 40px;  # Set width
+                height: 40px;  # Set height
+                padding: 0px;  # Remove padding
+            }
+            QPushButton:pressed {
+                background-color: #dddddd;  # Background color when pressed
+            }
+        """)
+    else:
+        print("Error: The returned button is not a QPushButton.")
+
+    return buttons + [button]
+
 
 init()
 
