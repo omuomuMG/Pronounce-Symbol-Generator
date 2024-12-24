@@ -1,4 +1,7 @@
 import os
+from PyQt6.QtCore import QTimer
+from aqt.utils import showInfo
+from aqt.editor import Editor
 
 converter = {
     "AO": "ɔ",
@@ -136,10 +139,30 @@ with open(fileName,"r", encoding="utf-8") as file:
             i += 1
         dic[word] = symbol
 
-    print(dic["APPLE"])
 
-def get_dict():
-    return dic
+def convert_word(editor: Editor, source_field, target_field):
+    if editor.note:
+        note = editor.note
+        symbol_text = ""
+        succeeded = True
+        for word in  note[source_field].split(' '):
+            word = word.upper()
+            if word in dic:
+                if len(symbol_text) != 0:
+                    symbol_text += ' '
+                symbol_text += dic[word]
+            else:
+                succeeded = False
+                showInfo(f"pronunciation: {word} wasn't found")
+                break
+        if succeeded:
+            note[target_field] = symbol_text
+
+        note.flush()
+        QTimer.singleShot(500, lambda: editor.loadNote())
+
+
+
 
 
 

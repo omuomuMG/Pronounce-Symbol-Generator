@@ -1,12 +1,8 @@
-from xmlrpc.client import boolean
-
 from aqt import mw
 from aqt.qt import *
 from aqt.editor import Editor
 from anki.hooks import addHook
-from aqt.utils import showInfo
-from .test import dic
-import sys
+from .phonetic_converter import  convert_word
 import json
 
 
@@ -23,26 +19,6 @@ def init():
     json_open.close()
 
 
-def convert_word(editor: Editor):
-    if editor.note:
-        note = editor.note
-        symbol_text = ""
-        succeeded = True
-        for word in  note[source_field].split(' '):
-            word = word.upper()
-            if word in dic:
-                if len(symbol_text) != 0:
-                    symbol_text += ' '
-                symbol_text += dic[word]
-            else:
-                succeeded = False
-                showInfo(f"pronunciation: {word} wasn't found")
-                break
-        if succeeded:
-            note[target_field] = symbol_text
-
-        note.flush()
-        QTimer.singleShot(500, lambda: editor.loadNote())
 
 
 def setting():
@@ -93,7 +69,7 @@ def setting():
 
 # on button pressed
 def onStrike(editor: Editor):
-    convert_word(editor)
+    convert_word(editor, source_field, target_field)
 
 
 def addWeblioButton(buttons, editor):
