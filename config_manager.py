@@ -38,10 +38,9 @@ def setting(source_field, target_field):
         json_load['setting']['source_field'] = source_text.text()
         json_load['setting']['target_field'] = target_text.text()
 
-        # Move file pointer to the beginning of the file and dump updated data
         json_open.seek(0)
-        json.dump(json_load, json_open, indent=4)  # Adding indent for better readability
-        json_open.truncate()  # Ensure we truncate the file after writing
+        json.dump(json_load, json_open, indent=4)
+        json_open.truncate()
 
 
 def get_field():

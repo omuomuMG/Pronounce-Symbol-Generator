@@ -2,6 +2,7 @@ import os
 from PyQt6.QtCore import QTimer
 from aqt.utils import showInfo
 from aqt.editor import Editor
+from .config_manager import  get_field
 
 converter = {
     "AO": "ɔ",
@@ -140,12 +141,20 @@ with open(fileName,"r", encoding="utf-8") as file:
         dic[word] = symbol
 
 
-def convert_word(editor: Editor, source_field, target_field):
+def convert_word(editor: Editor):
+    source_field = get_field()[0]
+    target_field = get_field()[1]
+
     if editor.note:
         note = editor.note
         symbol_text = ""
         succeeded = True
-        for word in  note[source_field].split(' '):
+
+        if source_field not in note:
+            showInfo("Please make sure the field in the settings\n Tools > Pronounce Symbol Generator Setting")
+            return
+
+        for word in note[source_field].split(' '):
             word = word.upper()
             if word in dic:
                 if len(symbol_text) != 0:
@@ -157,12 +166,23 @@ def convert_word(editor: Editor, source_field, target_field):
                 break
         if succeeded:
             note[target_field] = symbol_text
-
         note.flush()
         QTimer.singleShot(500, lambda: editor.loadNote())
 
 
-def convert_words(note, source_field, target_field):
+
+
+
+
+
+def convert_words(note):
+    source_field = get_field()[0]
+    target_field = get_field()[1]
+
+    if source_field not in note:
+        showInfo("Please make sure the field in the settings\n Tools > Pronounce Symbol Generator Setting")
+        return
+
     symbol_text = ""
     for word in note[source_field].split(' '):
         word = word.upper()

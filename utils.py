@@ -1,35 +1,30 @@
-from unittest.result import failfast
-
 from aqt import mw
 from aqt.qt import *
 from aqt.editor import Editor
 from aqt.utils import showInfo
 
 from .config_manager import  get_field
-from .phonetic_converter import convert_word, dic, convert_words
+from .phonetic_converter import convert_word, convert_words
 
 
 def on_strike(editor: Editor):
-    source_field = get_field()[0]
-    target_field = get_field()[1]
-    convert_word(editor, source_field, target_field)
+    convert_word(editor)
 
 
-def add_symbol_button(buttons, editor):
+def symbol_button(buttons, editor):
     addon_dir = os.path.dirname(os.path.realpath(__file__))
     icon_path = os.path.join(addon_dir, 'resources/SymbolIcon.png')
 
-    editor._links['strike'] = on_strike
+    editor._links['symbol_button'] = on_strike
 
     button = editor._addButton(
-        icon_path,  # Button icon
-        "strike",  # Button name
-        "strike"  # Button label
+        icon_path,
+        "symbol_button",  # Button name
+        "symbol_button"  # Button label
     )
 
-    # Check if the returned object is a QPushButton
+
     if isinstance(button, QPushButton):
-        # Set the style if the button is of the correct type
         button.setStyleSheet("""
             QPushButton {
                 width: 40px;  # Set width
@@ -55,8 +50,6 @@ def get_selected_cards_from_browser(browser):
 
 
 def process_selected_cards_in_browser(browser):
-    source_field = get_field()[0]
-    target_field = get_field()[1]
 
     selected_card_ids = get_selected_cards_from_browser(browser)
     if not selected_card_ids:
@@ -69,7 +62,7 @@ def process_selected_cards_in_browser(browser):
         card = mw.col.getCard(card_id)
 
         note = card.note()
-        if not convert_words(note, source_field, target_field):
+        if not convert_words(note):
             failed_count += 1
         else:
             success_count += 1
@@ -78,6 +71,7 @@ def process_selected_cards_in_browser(browser):
             [f"{success_count} words success\n {failed_count} words failed"]
     )
     showInfo(f"{display_info}")
+
 
 def add_browser_menu_button(browser):
     action = QAction("Convert selected words - PSG", browser)
