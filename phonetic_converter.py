@@ -162,6 +162,21 @@ def convert_word(editor: Editor, source_field, target_field):
         QTimer.singleShot(500, lambda: editor.loadNote())
 
 
+def convert_words(note, source_field, target_field):
+    symbol_text = ""
+    for word in note[source_field].split(' '):
+        word = word.upper()
+        if word in dic:
+            if len(symbol_text) != 0:
+                symbol_text += ' '
+            symbol_text += dic[word]
+        else:
+            return False
+    note[target_field] = symbol_text
+
+    note.flush()
+    QTimer.singleShot(500, lambda: note.load())
+    return True
 
 
 
