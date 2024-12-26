@@ -166,7 +166,11 @@ def convert_word(editor: Editor):
                 break
         if succeeded:
             note[target_field] = symbol_text
-        note.flush()
+            if note.id == 0:
+                editor.mw.col.addNote(note)
+            else:
+                note.flush()
+
         QTimer.singleShot(500, lambda: editor.loadNote())
 
 
