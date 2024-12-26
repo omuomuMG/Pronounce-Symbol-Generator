@@ -116,7 +116,7 @@ converter = {
 
 addon_dir = os.path.dirname(os.path.realpath(__file__))
 
-dictionary_path = os.path.join(addon_dir, 'COMDictionary.txt')
+dictionary_path = os.path.join(addon_dir, 'resources/COMDictionary.txt')
 print(dictionary_path)
 
 dic ={str:str}

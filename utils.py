@@ -12,7 +12,7 @@ def on_strike(editor: Editor):
 
 def add_symbol_button(buttons, editor):
     addon_dir = os.path.dirname(os.path.realpath(__file__))
-    icon_path = os.path.join(addon_dir, 'SymbolIcon.png')
+    icon_path = os.path.join(addon_dir, 'resources/SymbolIcon.png')
 
     editor._links['strike'] = on_strike
 
