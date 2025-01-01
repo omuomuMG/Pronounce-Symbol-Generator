@@ -142,37 +142,43 @@ with open(fileName,"r", encoding="utf-8") as file:
 
 
 def convert_word(editor: Editor):
-    source_field = get_field()[0]
-    target_field = get_field()[1]
+    source_field, target_field = get_field()
 
-    if editor.note:
-        note = editor.note
-        symbol_text = ""
-        succeeded = True
+    if not editor.note:
+        showInfo("No note selected.")
+        return
 
-        if source_field not in note:
-            showInfo("Please make sure the field in the settings\n Tools > Pronounce Symbol Generator Setting")
+    note = editor.note
+
+    if source_field not in note:
+        showInfo("Source field not found. Check settings in Tools > Pronounce Symbol Generator Settings.")
+        return
+
+    if target_field not in note:
+        showInfo(f"Target field '{target_field}' does not exist in the current note.")
+        return
+
+    source_text = note[source_field]
+    symbol_text = ""
+    succeeded = True
+
+    for word in source_text.split():
+        word = word.upper()
+        if word in dic:
+            symbol_text += dic[word] + ' '
+        else:
+            succeeded = False
+            showInfo(f"Word '{word}' not found in the dictionary.")
+            break
+
+    if succeeded:
+        if not symbol_text.strip():
+            showInfo("Converted symbol text is empty.")
             return
+        note[target_field] = symbol_text
 
-        for word in note[source_field].split(' '):
-            word = word.upper()
-            if word in dic:
-                if len(symbol_text) != 0:
-                    symbol_text += ' '
-                symbol_text += dic[word]
-            else:
-                succeeded = False
-                showInfo(f"pronunciation: {word} wasn't found")
-                break
-        if succeeded:
-            note[target_field] = symbol_text
-            if note.id == 0:
-                editor.mw.col.addNote(note)
-            else:
-                note.flush()
 
         QTimer.singleShot(500, lambda: editor.loadNote())
-
 
 
 
