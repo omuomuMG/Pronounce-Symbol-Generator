@@ -10,7 +10,6 @@
         "config_manager.py",
         "utils.py",
         "phonetic_converter.py",
-        "setting.json",
         "CMDDictionary.txt",
         "resources/icon.png"
     ]
