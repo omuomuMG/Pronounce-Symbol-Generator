@@ -1,5 +1,17 @@
 {
-    "name": "Pronounce Symbol Generator",
-    "mod": 1234567890,
-    "conflicts": []
+    "package": {
+        "name": "Pronounce Symbol Generator",
+        "version": "1.0.0",
+        "description": "Easily add phonetic symbols to your notes with a single click!\n\n",
+        "author": "omuomuMG"
+    },
+    "files": [
+        "__init__.py",
+        "config_manager.py",
+        "utils.py",
+        "phonetic_converter.py",
+        "setting.json",
+        "CMDDictionary.txt",
+        "resources/icon.png"
+    ]
 }
