@@ -22,8 +22,11 @@ Go to **Tools** > **Pronounce Symbol Generator Settings**.
 
 ### To Convert Multiple Words
 1. Open the browser window.
-2. From the menu bar, select **Convert Selected Words** > **PSG**.
+2. From the menu bar, select **Convert Selected Words-PSG**.
 
 ## License
 
 You can view the license details in the `LICENSE` file.
+
+## AnkiWeb
+[AnkiWeb](https://ankiweb.net/shared/info/2075109613?cb=1735716386693)
