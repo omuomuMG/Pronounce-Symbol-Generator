@@ -1,5 +1,6 @@
 ![PronounceSymbolGenerator](https://github.com/user-attachments/assets/515717dc-bd37-4d88-af7f-788386b3cb45)
-# Simple Pronounce Symbol Generator
+# Simple Pronounce Symbol Generator 
+## Anki Add-on for English Learner
 Easily add phonetic symbols to your notes with a single click!
 
 
