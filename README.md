@@ -21,6 +21,9 @@ Easily add phonetic symbols to your notes with a single click!
 ### To Set Fields
 Go to **Tools** > **Pronounce Symbol Generator Settings**.
 
+<img width="600" alt="menuber setting" src="https://github.com/user-attachments/assets/cf849869-dc04-4aa5-a415-880eb755712e" />
+<img width="299" alt="setting screen" src="https://github.com/user-attachments/assets/ec3f073e-1fd6-4070-8283-687a5d3e0f08" />
+
 ### To Convert Multiple Words
 1. Open the browser window.
 2. From the menu bar, select **Convert Selected Words-PSG**.
