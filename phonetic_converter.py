@@ -1,8 +1,9 @@
 import os
 from PyQt6.QtCore import QTimer
-from aqt.utils import showInfo
+from aqt.utils import showInfo, tooltip
 from aqt.editor import Editor
 from .config_manager import  get_field
+import re
 
 converter = {
     "AO": "ɔ",
@@ -118,8 +119,6 @@ converter = {
 addon_dir = os.path.dirname(os.path.realpath(__file__))
 
 dictionary_path = os.path.join(addon_dir, 'resources/COMDictionary.txt')
-print(dictionary_path)
-
 dic ={str:str}
 fileName = dictionary_path
 
@@ -141,6 +140,17 @@ with open(fileName,"r", encoding="utf-8") as file:
         dic[word] = symbol
 
 
+def convert_token(token: str) -> str:
+    # Match leading punctuation, the core word (letters and apostrophes), and trailing punctuation.
+    m = re.match(r"(^[^A-Z']*)([A-Z']+)([^A-Z']*$)", token.upper())
+    if m:
+        prefix, core, suffix = m.groups()
+        # If the core word exists in our dictionary, convert it.
+        if core in dic:
+            return prefix + dic[core] + suffix
+    # If not matched or conversion not found, return the original token.
+    return token
+
 def convert_word(editor: Editor):
     source_field, target_field = get_field()
 
@@ -159,51 +169,54 @@ def convert_word(editor: Editor):
         return
 
     source_text = note[source_field]
-    symbol_text = ""
+    # Split text into tokens (words and space/punctuation separators)
+    tokens = re.split(r'(\s+|[.,/()])', source_text)
+    converted_tokens = []
     succeeded = True
+    failed_tokens = []
 
-    for word in source_text.split():
-        word = word.upper()
-        if word in dic:
-            symbol_text += dic[word] + ' '
+    for token in tokens:
+        if re.fullmatch(r'(\s+|[.,/()])', token):
+            converted_tokens.append(token)
         else:
-            succeeded = False
-            showInfo(f"Word '{word}' not found in the dictionary.")
-            break
+            converted = convert_token(token)
+            # If conversion did not change the token and token isn't empty, mark conversion as partial failure.
+            if converted == token and token.strip() != "":
+                succeeded = False
+                failed_tokens.append(token)
+            converted_tokens.append(converted)
 
-    if succeeded:
-        if not symbol_text.strip():
-            showInfo("Converted symbol text is empty.")
-            return
-        note[target_field] = symbol_text
+    symbol_text = ''.join(converted_tokens)
 
-
-        QTimer.singleShot(500, lambda: editor.loadNote())
-
-
-
-
-
-
-def convert_words(note):
-    source_field = get_field()[0]
-    target_field = get_field()[1]
-
-    if source_field not in note:
-        showInfo("Please make sure the field in the settings\n Tools > Pronounce Symbol Generator Setting")
+    if not symbol_text.strip():
+        showInfo("Converted symbol text is empty.")
         return
 
-    symbol_text = ""
-    for word in note[source_field].split(' '):
-        word = word.upper()
-        if word in dic:
-            if len(symbol_text) != 0:
-                symbol_text += ' '
-            symbol_text += dic[word]
-        else:
-            return False
-    note[target_field] = symbol_text
+    if not succeeded:
+        tooltip(f"Some tokens could not be converted: {', '.join(failed_tokens)}", period = 3000)
 
+    note[target_field] = symbol_text
+    QTimer.singleShot(500, lambda: editor.loadNote())
+    
+def convert_words(note):
+    source_field, target_field = get_field()
+
+    if source_field not in note:
+        showInfo("Please make sure the field is set in Tools > Pronounce Symbol Generator Settings")
+        return
+
+    source_text = note[source_field]
+    tokens = re.split(r'(\s+|[.,/()])', source_text)
+    converted_tokens = []
+    
+    for token in tokens:
+        if re.fullmatch(r'(\s+|[.,/()])', token):
+            converted_tokens.append(token)
+        else:
+            converted_tokens.append(convert_token(token))
+            
+    symbol_text = ''.join(converted_tokens)
+    note[target_field] = symbol_text
     note.flush()
     QTimer.singleShot(500, lambda: note.load())
     return True

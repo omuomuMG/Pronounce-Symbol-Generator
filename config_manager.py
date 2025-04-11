@@ -1,5 +1,8 @@
 import json
+import os
 from aqt.qt import *
+from pathlib import Path
+from aqt import mw
 
 
 def setting(source_field, target_field):
@@ -30,8 +33,8 @@ def setting(source_field, target_field):
     dialog.setLayout(layout)
     dialog.exec()
 
-    addon_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(addon_dir, 'setting.json')
+    profile_dir = Path(mw.pm.profileFolder())
+    json_path = profile_dir / "pronounce_symbol_generator.json"
 
     with open(json_path, 'r+') as json_open:
         json_load = json.load(json_open)
@@ -44,16 +47,34 @@ def setting(source_field, target_field):
 
 
 def get_field():
-    addon_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(addon_dir, 'setting.json')
+    profile_dir = Path(mw.pm.profileFolder())
+    json_path = profile_dir / "pronounce_symbol_generator.json"
 
-    with open(json_path, 'r+') as json_open:
-        json_load = json.load(json_open)
-        source_field = json_load['setting']['source_field']
-        target_field = json_load['setting']['target_field']
+    # If the config file does not exist, create it with default settings.
+    if not json_path.exists():
+        default_config = {"setting": {"source_field": "Front", "target_field": "Back"}}
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(default_config, f, indent=4)
 
-        # Move file pointer to the beginning of the file and dump updated data
+    with open(json_path, 'r+', encoding='utf-8') as json_open:
+        content = json_open.read()
+        if not content.strip():
+            json_load = {"setting": {"source_field": "", "target_field": ""}}
+        else:
+            try:
+                json_load = json.loads(content)
+            except json.JSONDecodeError:
+                json_load = {"setting": {"source_field": "", "target_field": ""}}
+
+        # Ensure the 'setting' key exists.
+        if 'setting' not in json_load:
+            json_load['setting'] = {"source_field": "", "target_field": ""}
+
+        source_field = json_load['setting'].get('source_field', '')
+        target_field = json_load['setting'].get('target_field', '')
+
+        # Move file pointer to the beginning of the file and dump updated data.
         json_open.seek(0)
         json.dump(json_load, json_open, indent=4)
         json_open.truncate()
-    return  source_field, target_field
+    return source_field, target_field
