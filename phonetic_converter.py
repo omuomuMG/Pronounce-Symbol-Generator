@@ -155,20 +155,24 @@ def convert_word(editor: Editor):
     source_field, target_field = get_field()
 
     if not editor.note:
-        showInfo("No note selected.")
+        tooltip("No note selected.")
         return
 
     note = editor.note
 
     if source_field not in note:
-        showInfo("Source field not found. Check settings in Tools > Pronounce Symbol Generator Settings.")
+        tooltip("Source field not found. Check settings in Tools > Pronounce Symbol Generator Settings.")
         return
 
     if target_field not in note:
-        showInfo(f"Target field '{target_field}' does not exist in the current note.")
+        tooltip(f"Target field '{target_field}' does not exist in the current note.")
         return
 
     source_text = note[source_field]
+
+    # remove HTML tags
+    source_text = re.sub(r'<[^>]+>', '', source_text)
+
     # Split text into tokens (words and space/punctuation separators)
     tokens = re.split(r'(\s+|[.,/()])', source_text)
     converted_tokens = []
@@ -178,6 +182,7 @@ def convert_word(editor: Editor):
     for token in tokens:
         if re.fullmatch(r'(\s+|[.,/()])', token):
             converted_tokens.append(token)
+
         else:
             converted = convert_token(token)
             # If conversion did not change the token and token isn't empty, mark conversion as partial failure.
@@ -189,7 +194,7 @@ def convert_word(editor: Editor):
     symbol_text = ''.join(converted_tokens)
 
     if not symbol_text.strip():
-        showInfo("Converted symbol text is empty.")
+        tooltip("Converted symbol text is empty.")
         return
 
     if not succeeded:
@@ -202,10 +207,18 @@ def convert_words(note):
     source_field, target_field = get_field()
 
     if source_field not in note:
-        showInfo("Please make sure the field is set in Tools > Pronounce Symbol Generator Settings")
+        tooltip("Please make sure the field is set in Tools > Pronounce Symbol Generator Settings")
         return
-
+    
+    if target_field not in note:
+        tooltip(f"Target field '{target_field}' does not exist in the current note.")
+        return
+    
     source_text = note[source_field]
+
+    # remove HTML tags
+    source_text = re.sub(r'<[^>]+>', '', source_text)
+
     tokens = re.split(r'(\s+|[.,/()])', source_text)
     converted_tokens = []
     
